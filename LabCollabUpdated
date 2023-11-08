@@ -20,6 +20,7 @@ def diffusion_ftcs(nspace, ntime, tau_rel, args):
     
     # How is tau related to tau_rel?
     # tau_rel is given by the equation t_sigma = h**2 / (2 * kappa)
+    # tau_rel=t/tau_sigma
 
     tau = ntime
 
@@ -65,16 +66,14 @@ def diffusion_ftcs(nspace, ntime, tau_rel, args):
     
     print(tplot)
 
-    print("SPACE")
+    print("\n")
 
     print(ttplot)
     
-    x = tplot*10
-    t = ttplot.flatten
+    # x = tplot*10
+    # t = ttplot.flatten
     
-    
-    return [x, t]
-
+    return tplot, ttplot
 
 # def diffusion_ftcs(nspace, ntime, tau_rel, args):
 #     nspace: number of spatial grid points
@@ -83,8 +82,8 @@ def diffusion_ftcs(nspace, ntime, tau_rel, args):
 #     args: list containing the problem parameters for thermal diffusion, the bar length L and the thermal diffusion coefficient
 #     returns the temperature field T(x, t) as a 2-D array
 
-tplot1, ttplot1 = diffusion_ftcs(10, 10, 10, args=[100,1]) # (50,) (10, 50)
-print(len(tplot1), len(ttplot1))
+# tplot1, ttplot1 = diffusion_ftcs(10, 10, 10, args=[100,1]) # (50,) (10, 50)
+# print(len(tplot1), len(ttplot1))
 
 # fig = plt.figure()
 # for i,T in enumerate(ttplot1):
@@ -103,9 +102,10 @@ tplot, ttplot = temp_field
 xplot = np.arange(nspace)*args[0]/(nspace-1) - args[0]/2.
 
 # * Plot temperature versus x and t as a wire-mesh plot
-fig, ax = plt.subplots()
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
 Tp, Xp = np.meshgrid(tplot, xplot)
-ax.plot_surface(Tp, Xp, ttplot, rstride=2, cstride=2, cmap=cm.gray)
+ax.plot_surface(Tp, Xp, np.array(ttplot), rstride=2, cstride=2, cmap=cm.gray)
 ax.set_xlabel('Time')
 ax.set_ylabel('x')
 ax.set_zlabel('T(x,t)')
@@ -120,3 +120,34 @@ plt.xlabel('Time')
 plt.ylabel('x')
 plt.title('Temperature contour plot')
 plt.close()
+
+## replotting 6.8:
+
+nspace1 = 61
+ntime1 = 0.0001
+tau_rel1 = 2
+args1 = [1,1]  # L, k = 1, 1
+
+temp_field1 = diffusion_ftcs(nspace1, ntime1, tau_rel1, args1)
+tplot1, ttplot1 = temp_field1
+xplot1 = np.arange(nspace1)*args1[0]/(nspace1-1) - args1[0]/2.
+
+# * Plot temperature versus x and t as a wire-mesh plot
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(projection='3d')
+Tp1, Xp1 = np.meshgrid(tplot1, xplot1)
+ax1.plot_surface(Tp1, Xp1, np.array(ttplot1), rstride=2, cstride=2, cmap=cm.gray)
+ax1.set_xlabel('Time')
+ax1.set_ylabel('x')
+ax1.set_zlabel('T(x,t)')
+ax1.set_title('Diffusion of a delta spike')
+plt.show()
+
+#* Plot temperature versus x and t as a contour plot
+levels = np.linspace(0., 10., num=21) 
+ct = plt.contour(tplot1, xplot1, ttplot1, levels) 
+plt.clabel(ct, fmt='%1.2f') 
+plt.xlabel('Time')
+plt.ylabel('x')
+plt.title('Temperature contour plot')
+plt.show()
