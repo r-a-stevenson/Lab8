@@ -4,7 +4,12 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 
-# Part 1
+## Part 1
+
+#* Set up loop and plot variables.
+nstep = 300                             # Maximum number of iterations
+nplots = 50                             # Number of snapshots (plots) to take
+plot_step = int(nstep/nplots)           # Number of time steps between plots
 
 # dftcs - Program to solve the diffusion equation using the Forward Time Centered Space (FTCS) scheme.
 
@@ -17,88 +22,51 @@ def diffusion_ftcs(nspace, ntime, tau_rel, args):
     args: list containing the problem parameters for thermal diffusion: the bar length (L) and the thermal diffusion coefficient (k)
     returns the temperature field T(x, t) as a 2-D array
     """
-    
-    # How is tau related to tau_rel?
-    # tau_rel is given by the equation t_sigma = h**2 / (2 * kappa)
-    # tau_rel=t/tau_sigma
 
-    tau = ntime
-
-    N = nspace
     L = args[0]
-    h = L/(N-1)   # Grid size
+    h = L/(nspace-1)   # Grid size
     kappa = args[1]
-    coeff = kappa*tau/h**2
-    # print(coeff)
+    tsigma = h**2/(2*kappa)
+    tau = tau_rel*tsigma
     
-    if coeff < 0.5 :
+    if tau_rel < 1 :
         print('Solution is expected to be stable')
     else:
         print('WARNING: Solution is expected to be unstable')
 
     #* Set initial and boundary conditions.
-    tt = np.zeros(N)                # Initialize temperature to zero at all points
-    tt[int(N/2)] = 1./h             # Initial cond. is delta function in center
-    ## The boundary conditions are tt[0] = tt[N-1] = 0
-
-    # print(tt)
-    #* Set up loop and plot variables.
-    xplot = np.arange(N)*h - L/2.    # Record the x scale for plots
-    iplot = 0                        # Counter used to count plots
-    nstep = 300                      # Maximum number of iterations
-    nplots = 50                      # Number of snapshots (plots) to take
-    plot_step = nstep/nplots         # Number of time steps between plots
+    tt = np.zeros((nspace, ntime))                          # Initialize temperature to zero at all points
+    tt[int(nspace/2)] = 1./h                                # Initial cond. is delta function in center
 
     #* Loop over the desired number of time steps.
-    ttplot = np.empty((N,nplots))
-    tplot = np.empty(nplots)
-    for istep in range(nstep):  ## MAIN LOOP ##
-        
+    ttplot = np.empty((nspace, nplots))
+    iplot = 0                                               # Counter used to count plots
+    for istep in range(nstep):
+
         #* Compute new temperature using FTCS scheme.
-        tt[1:(N-1)] = ( tt[1:(N-1)] + 
-            coeff*( tt[2:N] + tt[0:(N-2)] - 2*tt[1:(N-1)] ) )
-        
+        tt[1:(nspace-1)] = ( tt[1:(nspace-1)] + 
+            kappa*tau/h**2*( tt[2:nspace] + tt[0:(nspace-2)] - 2*tt[1:(nspace-1)] ) )
+    
         #* Periodically record temperature for plotting.
-        if (istep+1) % plot_step < 1 :         # Every plot_step steps
-            ttplot[:,iplot] = np.copy(tt)      # record tt(i) for plotting
-            tplot[iplot] = (istep+1)*tau       # Record time for plots
+        if (istep+1) % plot_step < 1 :                      # Every plot_step steps
+            ttplot[:,iplot] = np.copy(tt[:,plot_step])      # record tt(i) for plotting
             iplot += 1
-    
-    print(tplot)
 
-    print("\n")
+    return ttplot                   
 
-    print(ttplot)
-    
-    # x = tplot*10
-    # t = ttplot.flatten
-    
-    return tplot, ttplot
+## Part 2
 
-# def diffusion_ftcs(nspace, ntime, tau_rel, args):
-#     nspace: number of spatial grid points
-#     ntime: number of timesteps to compute
-#     tau_rel: time step in units of the critical time-step for stability
-#     args: list containing the problem parameters for thermal diffusion, the bar length L and the thermal diffusion coefficient
-#     returns the temperature field T(x, t) as a 2-D array
-
-# tplot1, ttplot1 = diffusion_ftcs(10, 10, 10, args=[100,1]) # (50,) (10, 50)
-# print(len(tplot1), len(ttplot1))
-
-# fig = plt.figure()
-# for i,T in enumerate(ttplot1):
-#     plt.plot(tplot1, ttplot1[i], label="T")
-# plt.legend()
-# plt.show()                     
-
-# Part 2
+# Plotting 6.7:
 nspace = 61
-ntime = 0.0001
-tau_rel = 0.1
-args = [1,1]  # L, k = 1, 1
+ntime = 10
 
-temp_field = diffusion_ftcs(nspace, ntime, tau_rel, args)
-tplot, ttplot = temp_field
+tau = 1*10**-4
+args = [1,1]
+tsigma = (args[0]/(nspace-1))**2/(2)
+tau_rel = tau/tsigma
+
+tplot = [(i+1)*tau for i in range(nstep) if (i+1)%plot_step <1]
+ttplot = diffusion_ftcs(nspace, ntime, tau_rel, args)
 xplot = np.arange(nspace)*args[0]/(nspace-1) - args[0]/2.
 
 # * Plot temperature versus x and t as a wire-mesh plot
@@ -110,32 +78,31 @@ ax.set_xlabel('Time')
 ax.set_ylabel('x')
 ax.set_zlabel('T(x,t)')
 ax.set_title('Diffusion of a delta spike')
-plt.close()
+plt.show()
 
 #* Plot temperature versus x and t as a contour plot
-levels = np.linspace(0., 10., num=21) 
+levels = np.linspace(0, 5., num=21) 
 ct = plt.contour(tplot, xplot, ttplot, levels) 
-plt.clabel(ct, fmt='%1.2f') 
+plt.clabel(ct, levels[::2], fmt='%1.2f') 
 plt.xlabel('Time')
 plt.ylabel('x')
 plt.title('Temperature contour plot')
-plt.close()
+plt.show()
 
-## replotting 6.8:
+## Plotting 6.8:
 
 nspace1 = 61
-ntime1 = 0.0001
+ntime1 = 10
 tau_rel1 = 2
 args1 = [1,1]  # L, k = 1, 1
 
-temp_field1 = diffusion_ftcs(nspace1, ntime1, tau_rel1, args1)
-tplot1, ttplot1 = temp_field1
+ttplot1 = diffusion_ftcs(nspace1, ntime1, tau_rel1, args1)
 xplot1 = np.arange(nspace1)*args1[0]/(nspace1-1) - args1[0]/2.
 
 # * Plot temperature versus x and t as a wire-mesh plot
 fig1 = plt.figure()
 ax1 = fig1.add_subplot(projection='3d')
-Tp1, Xp1 = np.meshgrid(tplot1, xplot1)
+Tp1, Xp1 = np.meshgrid(tplot, xplot1)
 ax1.plot_surface(Tp1, Xp1, np.array(ttplot1), rstride=2, cstride=2, cmap=cm.gray)
 ax1.set_xlabel('Time')
 ax1.set_ylabel('x')
@@ -144,9 +111,9 @@ ax1.set_title('Diffusion of a delta spike')
 plt.show()
 
 #* Plot temperature versus x and t as a contour plot
-levels = np.linspace(0., 10., num=21) 
-ct = plt.contour(tplot1, xplot1, ttplot1, levels) 
-plt.clabel(ct, fmt='%1.2f') 
+levels = np.linspace(0, 10., num=21) 
+ct = plt.contour(tplot, xplot1, ttplot1, levels) 
+plt.clabel(ct, levels[::2], fmt='%1.2f') 
 plt.xlabel('Time')
 plt.ylabel('x')
 plt.title('Temperature contour plot')
