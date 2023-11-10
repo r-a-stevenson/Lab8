@@ -60,6 +60,8 @@ def diffusion_ftcs(nspace, ntime, tau_rel, args):
 nspace = 61
 ntime = 10
 
+# Comment here
+# Another comment
 tau = 1*10**-4
 args = [1,1]
 tsigma = (args[0]/(nspace-1))**2/(2)
