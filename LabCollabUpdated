@@ -60,21 +60,28 @@ def diffusion_ftcs(nspace, ntime, tau_rel, args):
 nspace = 61
 ntime = 10
 
-# Comment here
-# Another comment
 tau = 1*10**-4
 args = [1,1]
+
+# Calculating time stability parameter
 tsigma = (args[0]/(nspace-1))**2/(2)
+
+# Calcluating raio of time step to stability time parameter
 tau_rel = tau/tsigma
 
+# Generate list of time plot for plotting over the specified interval
 tplot = [(i+1)*tau for i in range(nstep) if (i+1)%plot_step <1]
+
+# Generate the plot of the temperature diffusion
 ttplot = diffusion_ftcs(nspace, ntime, tau_rel, args)
+# 
 xplot = np.arange(nspace)*args[0]/(nspace-1) - args[0]/2.
 
 # * Plot temperature versus x and t as a wire-mesh plot
 fig = plt.figure(figsize=plt.figaspect(0.4))
 ax = fig.add_subplot(1, 2, 1, projection='3d')
 Tp, Xp = np.meshgrid(tplot, xplot)
+# Make a suface plot with with a meshgrid of the tplot and xplot against the ttplot with grayscale colourmap from the 2d array of values
 ax.plot_surface(Tp, Xp, np.array(ttplot), rstride=2, cstride=2, cmap=cm.gray)
 ax.set_xlabel('Time')
 ax.set_ylabel('x')
