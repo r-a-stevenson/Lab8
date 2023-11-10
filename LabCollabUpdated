@@ -72,7 +72,6 @@ ttplot = diffusion_ftcs(nspace, ntime, tau_rel, args)
 xplot = np.arange(nspace)*args[0]/(nspace-1) - args[0]/2.
 
 # * Plot temperature versus x and t as a wire-mesh plot
-# fig = plt.figure()
 fig = plt.figure(figsize=plt.figaspect(0.4))
 ax = fig.add_subplot(1, 2, 1, projection='3d')
 Tp, Xp = np.meshgrid(tplot, xplot)
@@ -81,7 +80,6 @@ ax.set_xlabel('Time')
 ax.set_ylabel('x')
 ax.set_zlabel('T(x,t)')
 ax.set_title('Diffusion of a delta spike')
-# plt.show()
 
 #* Plot temperature versus x and t as a contour plot
 ax = fig.add_subplot(1, 2, 2)
@@ -112,7 +110,6 @@ ax1.set_xlabel('Time')
 ax1.set_ylabel('x')
 ax1.set_zlabel('T(x,t)')
 ax1.set_title('Diffusion of a delta spike')
-# plt.show()
 
 #* Plot temperature versus x and t as a contour plot
 ax1 = fig1.add_subplot(1, 2, 2)
