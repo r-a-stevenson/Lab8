@@ -90,7 +90,7 @@ ax.set_title('Diffusion of a delta spike')
 
 #* Plot temperature versus x and t as a contour plot
 ax = fig.add_subplot(1, 2, 2)
-levels = np.linspace(0, 5., num=21) 
+levels = np.linspace(0.5, 5., num=20) 
 ct = plt.contour(tplot, xplot, ttplot, levels) 
 ax.clabel(ct, levels[::2], fmt='%1.2f') 
 ax.set_xlabel('Time')
@@ -120,7 +120,7 @@ ax1.set_title('Diffusion of a delta spike')
 
 #* Plot temperature versus x and t as a contour plot
 ax1 = fig1.add_subplot(1, 2, 2)
-levels = np.linspace(0, 10., num=21) 
+levels = np.linspace(0.5, 10., num=20) 
 ct = plt.contour(tplot, xplot1, ttplot1, levels) 
 ax1.clabel(ct, levels[::2], fmt='%1.2f') 
 ax1.set_xlabel('Time')
