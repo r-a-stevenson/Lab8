@@ -11,8 +11,11 @@ import matplotlib.pyplot as plt
 
 def traffic_flow(N, nstep):
     """
-    Solves the advection equation for the time evolution of ρ(x, t), using the Lax method with ρSL(x) as the initial condition\n
-    Intputs:
+    Solves the advection equation for the time 
+    evolution of ρ(x, t), using the Lax method 
+    with ρSL(x) as the initial condition.
+
+    Inputs:
     \tN: number of grid points (int)
     \ttau: time step (float in seconds)
     \tnstep: number of time steps (int)
@@ -81,7 +84,7 @@ def traffic_flow(N, nstep):
 
 rplot, tplot, xplot = traffic_flow(600, 1500)
 
-## Part 2: Owen and Deka
+## Part 2: Owen and Deka (including questions)
 
 #* Graph density versus position and time as wire-mesh plot
 from matplotlib import cm
@@ -101,11 +104,29 @@ selectedTimes = np.arange(0, 1201, 300) # picking the time values
 
 fig2 = plt.figure()
 for i in selectedTimes:
-    plt.plot(xplot, rplot[:,i], label="t={}s".format(i))
+    plt.plot(xplot, rplot[:,i], label="t={}s".format(i)) # plotting rho vs x for the values of rho in selectedTimes array
 plt.xlabel('x Values')
 plt.ylabel('rho Values')
 plt.title('Density contours')
 plt.legend()
 plt.show()
 
-# 
+# In reference to your contour plot, does a shock 
+# front seem to form in the flow? 
+# If so, why and at what time does it first appear? 
+# In what direction does the front propagate?
+
+""" A shock front does form.
+
+It appears at time t = 0 and at position 
+x = -300, because that is the decided location of
+the highest density in a 1-d 'x' space.
+
+It propogates directly upward at first because the 
+rate of particles entering the shock front is the 
+same as the rate of particles leaving the shock front. 
+It then travels towards positive X because as particles
+'pile up' at the shock front, the shock front moves
+in the direction the particles are coming from to
+account for the extra space they take up, since these
+new particles contribute to the front as well."""
