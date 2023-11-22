@@ -54,8 +54,6 @@ plt.xlabel('x')
 plt.ylabel('a(x)')
 plt.show()
 
-print(make_initialcond)
-
 # Part 3: Giorgio
 def spectral_radius(A):
     """
