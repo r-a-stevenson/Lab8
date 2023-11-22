@@ -49,6 +49,9 @@ a(x, 0)=exp[-x**2/(2sigma^2)]cos(kx)\n
 
 fig = plt.figure()
 plt.plot(x,make_initialcond(sigma,k,x))
+plt.title('Intial Condtion Function vs. x in Nspace Range')
+plt.xlabel('x')
+plt.ylabel('a(x)')
 plt.show()
 
 print(make_initialcond)
