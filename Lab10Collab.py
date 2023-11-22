@@ -47,6 +47,10 @@ a(x, 0)=exp[-x**2/(2sigma^2)]cos(kx)\n
     initialcond = np.exp(-x_i**2/(2*sigma**2))*np.cos(k*x_i)
     return initialcond
 
+fig = plt.figure()
+plt.plot(x,make_initialcond(sigma,k,x))
+plt.show()
+
 print(make_initialcond)
 
 # Part 3: Giorgio
