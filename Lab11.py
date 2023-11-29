@@ -70,24 +70,51 @@ def advection1d(method, nspace, ntime, tau_rel, params):
 
     # Constant in front of matrix B
     k = (c*tau_rel)/(2*h)
+    sigma = 0.2
 
-    matrixC = make_tridiagonal(nspace, 1, 0, 1)
-    matrixB = make_tridiagonal(nspace, -1, 0, 1)
-
-    properMatrixA = (0.5)*matrixC - k*matrixB
-
-    # Construct the matrix
-    # matrix = make_tridiagonal(nspace, leftParam, midParam, rightParam)
-
+    # Construct the matrices
     if method.lower() =="lax":
+        matrixC = make_tridiagonal(nspace, 1, 0, 1)
+        matrixB = make_tridiagonal(nspace, -1, 0, 1)
+        matrixC[0][-1] = 1
+        matrixC[-1][0] = 1
+        matrixB[0][-1] = 1
+        matrixB[-1][0] = -1
+
+        properMatrixA = (0.5)*matrixC - k*matrixB
+
         if spectral_radius(properMatrixA)<=1:
             print("Method is expected to be stable.")
         else:
             print("WARNING: method is expected to be unstable.")
-    else:
-        print("WARNING: FTCS method is (always) expected to be unstable")
 
-    return (properMatrixA, x, t) 
+    elif method.lower() =="ftcs":
+        properMatrixA = make_tridiagonal(nspace, 1, 1, -k)
+        properMatrixA[0][-1] = 1
+        properMatrixA[-1][0] = -k
+
+
+        print("WARNING: FTCS method is (always) expected to be unstable.")
+
+    else:
+        print("Unknown method.")
+
+    init = make_initialcond(sigma, k, x)
+    product = np.dot(properMatrixA, init)
+
+    a = np.zeros([ntime, nspace])
+    a[0] = product
+
+    for i in range(1, len(t)):
+        if i+1>=len(t):
+            break
+        a[i] = np.dot(properMatrixA, a[i-1])
+
+        # print(a[i])
+
+    print(a[0], a[10], a[100])
+
+    return (a, x, t, init) 
 
 c = 1
 tau_rel = 1
@@ -97,36 +124,45 @@ ntime = 501
 
 params = [L, c]
 
-a_lax, x_lax, t_lax = advection1d("lax", nspace, ntime, tau_rel, params)
-a_FTCS, x_FTCS, t_FTCS = advection1d("ftcs", nspace, ntime, tau_rel, params)
+a_lax, x_lax, t_lax, init = advection1d("lax", nspace, ntime, tau_rel, params)
+a_FTCS, x_FTCS, t_FTCS, init_FTCS = advection1d("ftcs", nspace, ntime, tau_rel, params)
+
+# print(a_lax)
+
+# fig = plt.figure()
+# plt.plot(x_lax, a_lax)
+# plt.show()
+
+# print(x_lax)
+# print(make_initialcond(0.2, (c*tau_rel)/(2*(L/(nspace-1))), np.linspace(-L/2, L/2, nspace)))
 
 # Part 2: Visualize the propogating wave through time - Merdeka
 
 # print(a_lax)
-# fig, ax = plt.subplots()# figsize=[10, 5]) # generating figure
-# camera = Camera(fig)
+fig, ax = plt.subplots()# figsize=[10, 5]) # generating figure
+camera = Camera(fig)
 
-# for i in [50, 150, 250]:
-#     plt.plot(x_lax, a_lax[i], c="maroon", label="Lax")
-#     # plt.plot(x_FTCS, a_FTCS[i], c="navy", label="FTCS")
-#     plt.suptitle("Animation of Wave Solved by Lax and FTCS Methods")
-#     # plt.annotate("Time (s) = {}".format(np.round(t_lax[i], 2)))
-#     # ax.set_xlim(xmin, xmax)
-#     # ax.set_ylim(ymin, ymax)
-#     plt.legend()
+for i in [0, 1, 2, 3, 4]:
+    plt.plot(x_lax, a_lax[i], label="{}".format(i))
+    # plt.plot(x_FTCS, a_FTCS[i], c="navy", label="FTCS")
+    plt.suptitle("Animation of Wave Solved by Lax and FTCS Methods")
+    # plt.annotate("Time (s) = {}".format(np.round(t_lax[i], 2)))
+    # ax.set_xlim(xmin, xmax)
+    # ax.set_ylim(ymin, ymax)
+    plt.legend()
 
-#     camera.snap() # saving an image of the plot for the animation at every point in time
-# plt.show()
-# animation = camera.animate(interval=10, repeat=True) # animating the collected images
-
-plotskip = 50
-fig, ax = plt.subplots()
-# space out the plots vertically to make the visualization clearer
-yoffset = a_lax[:,0].max() - a_lax[:,0].min()
-# loop in reverse order to make the legend come out right
-for i in range(10): 
-    ax.plot(x_lax, a_lax[:,i]+yoffset*i/plotskip,label = 't ={:.3f}'.format(t_lax[i]))
-ax.legend()
-ax.set_xlabel('X position')
-ax.set_ylabel('a(x,t) [offset]')
+    camera.snap() # saving an image of the plot for the animation at every point in time
 plt.show()
+# # animation = camera.animate(interval=10, repeat=True) # animating the collected images
+
+# plotskip = 50
+# fig, ax = plt.subplots()
+# # space out the plots vertically to make the visualization clearer
+# yoffset = a_lax[:,0].max() - a_lax[:,0].min()
+# # loop in reverse order to make the legend come out right
+# for i in [50, 100, 200]:
+#     ax.plot(x_lax, a_lax[:,i]+yoffset*i/plotskip,label = 't ={:.3f}'.format(t_lax[i]))
+# ax.legend()
+# ax.set_xlabel('X position')
+# ax.set_ylabel('a(x,t) [offset]')
+# plt.show()
